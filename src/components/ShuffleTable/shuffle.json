@@ -1,0 +1,25 @@
+{
+  "columns": {
+    "0": "TimeTable",
+    "1": "Speaker"
+  },
+  "rows": {
+    "timeTable": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "speaker": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+    ]
+  },
+  "shuffleKey": "speaker"
+}
