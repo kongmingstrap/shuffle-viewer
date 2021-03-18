@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, VFC } from "react"
+import { VFC } from "react"
 import {
   makeStyles,
   Button,
@@ -9,9 +9,10 @@ import {
   TableHead,
   TableRow
 } from '@material-ui/core'
-import { ShuffleData } from "../../domains/ShuffleData"
-import arrayShuffle from "array-shuffle"
-import shuffle from "./shuffle.json"
+import ReactSound, { ReactSoundProps } from "react-sound"
+
+import { useShuffleTable, UseShuffleTableInterface, TableProps } from './useShuffleTable'
+import { useMessenger, UseMessengerInterface } from './useMessenger'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -38,32 +39,43 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     marginTop: `16px`,
+    marginRight: `16px`,
     backgroundColor: theme.palette.primary.main,
   }
 }))
 
 export interface ShuffleTablePresenterProps
   extends ShuffleTableProps {
-    columns: string[]
-    rows: string[][]
+    table: TableProps
     shuffling: boolean
-    onShuffle: () => void
+    shuffleKeyIndex: number
+    soundProps: ReactSoundProps
+    takeShuffle: UseShuffleTableInterface['takeShuffle']
+    sendMessage: UseMessengerInterface['sendMessage']
   }
 
 export interface ShuffleTableProps {}
 
 const ShuffleTablePresenter: VFC<ShuffleTablePresenterProps> = (props) => {
-  const { columns, rows, shuffling, onShuffle } = props
+  const {
+    table,
+    shuffling,
+    shuffleKeyIndex,
+    soundProps,
+    takeShuffle,
+    sendMessage
+  } = props
 
   const classes = useStyles()
 
   return (
     <div>
+      <ReactSound {...soundProps} />
       <TableContainer className={classes.container}>
         <Table size="small" className={classes.table}>
           <TableHead className={classes.head}>
             <TableRow>
-              {columns.map((column, i) => {
+              {table.columns.map((column, i) => {
                 return (
                   <TableCell key={i} className={classes.headCell}>
                     {column}
@@ -73,7 +85,7 @@ const ShuffleTablePresenter: VFC<ShuffleTablePresenterProps> = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, i) => (
+            {table.rows.map((row, i) => (
               <TableRow className={classes.tableRow}>
                 {row.map((row, j) => (
                   <TableCell key={`${i}_${j}`}>{row}</TableCell>
@@ -87,57 +99,40 @@ const ShuffleTablePresenter: VFC<ShuffleTablePresenterProps> = (props) => {
         variant="contained"
         color="primary"
         className={classes.button}
-        onClick={() => onShuffle()}
+        onClick={() => takeShuffle()}
       >
         {(!shuffling) ? `シャッフルする` : `ストップ！`}
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        className={classes.button}
+        onClick={() => sendMessage(table.rows, shuffleKeyIndex)}
+      >
+        {`Send`}
       </Button>
     </div>
   )
 }
 
 export const ShuffleTable: VFC<ShuffleTableProps> = () => {
-  const shuffleData: ShuffleData = JSON.parse(JSON.stringify(shuffle))
-  const columns = Object.values(shuffleData.columns)
-  const [shuffling, setShuffling] = useState(false)
-  const [shuffledRows, setShuffledRows] = useState(
-    Object.keys(shuffleData.rows).map((key) => shuffleData.rows[key])
-  )
-  const rows = shuffledRows[0].map((_, idx) => {
-    return shuffledRows.map((v) => v[idx])
-  })
-
-  const onShuffle = () => {
-    if (!shuffling) {
-      setShuffling(true)
-    } else {
-      setShuffling(false)
-    }
-  }
-
-  const shuffleRows = useCallback(() => {
-    const rows = Object.keys(shuffleData.rows).map((key) => {
-      return (key === shuffleData.shuffleKey) ?
-        arrayShuffle(shuffleData.rows[key]) : shuffleData.rows[key]
-      })
-    setShuffledRows(rows)
-  }, [shuffleData])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      shuffleRows()
-    }, 200)
-    if (!shuffling) {
-      clearTimeout(timer)
-    }
-    return () => clearTimeout(timer)
-  }, [shuffling, shuffleRows])
+  const {
+    table,
+    shuffling,
+    shuffleKeyIndex,
+    soundProps,
+    takeShuffle
+  } = useShuffleTable()
+  const { sendMessage } = useMessenger()
 
   return (
     <ShuffleTablePresenter
-      columns={columns}
-      rows={rows}
+      table={table}
       shuffling={shuffling}
-      onShuffle={onShuffle}
+      shuffleKeyIndex={shuffleKeyIndex}
+      soundProps={soundProps}
+      takeShuffle={takeShuffle}
+      sendMessage={sendMessage}
     />
   )
 }
