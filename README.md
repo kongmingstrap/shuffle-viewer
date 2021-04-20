@@ -17,6 +17,8 @@ REACT_APP_SLACK_ICON_EMOJI=<Slackのアイコン>
 ```
 
 - セッション情報は `src/components/ShuffleTable/shuffle.json` の中身に変更してください
+  - `shuffleKey` に対応した `rows` のキーがシャッフルの対象になります
+  - 順番を固定したい方がおられる場合は `fixedRows` に追加してください
 - シャッフル中に音声を再生させたい場合は、音声ファイルを `public/shuffle.mp3` という名前で配置してください
 
 ### `yarn start`
