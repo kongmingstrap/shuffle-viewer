@@ -33,5 +33,10 @@
       "hoge 12"
     ]
   },
-  "shuffleKey": "speaker"
+  "shuffleKey": "speaker",
+  "fixedRows": [
+    "hoge 3",
+    "hoge 6",
+    "hoge 9"
+  ]
 }

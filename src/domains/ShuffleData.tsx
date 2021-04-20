@@ -1,6 +1,7 @@
 export type ShuffleData = {
   columns: Record<string, string>
   rows: Record<string, string[]>
+  fixedRows?: string[]
   shuffleKey: string
 }
 

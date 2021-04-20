@@ -48,15 +48,26 @@ export const useShuffleTable = (): UseShuffleTableInterface => {
     setShuffledRows(rows)
   }, [shuffleData])
 
-  const takeShuffle = () => {
+  const takeShuffle = useCallback(() => {
     if (!shuffling) {
       setShuffling(true)
       setSoundProps({ ...soundProps, playStatus: 'PLAYING' })
     } else {
       setShuffling(false)
+      // If there is a fixed row
+      if (shuffleData.fixedRows !== undefined && shuffleData.fixedRows.length > 0) {
+        shuffleData.fixedRows.forEach((row) => {
+          // Swap
+          const rawIndex = shuffleData.rows[shuffleData.shuffleKey].indexOf(row)
+          const nowIndex = shuffledRows[shuffleKeyIndex].indexOf(row)
+          const tmpData = shuffledRows[shuffleKeyIndex][rawIndex]
+          shuffledRows[shuffleKeyIndex][rawIndex] = shuffledRows[shuffleKeyIndex][nowIndex]
+          shuffledRows[shuffleKeyIndex][nowIndex] = tmpData
+        })
+      }
       setSoundProps({ ...soundProps, playStatus: 'STOPPED' })
     }
-  }
+  }, [shuffleData, shuffleKeyIndex, shuffledRows, shuffling, soundProps])
 
   useEffect(() => {
     const timer = setTimeout(() => {
